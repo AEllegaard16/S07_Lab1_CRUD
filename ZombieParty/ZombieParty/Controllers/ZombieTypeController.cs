@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ZombieParty.Models;
 using ZombieParty.Models.Data;
 using ZombieParty.ViewModels;
@@ -60,5 +61,48 @@ namespace ZombieParty.Controllers
             return this.View(zombieType);
         }
 
+        public IActionResult Edit(int id)
+        {
+            ZombieTypeVM zombieTypeVM = new ZombieTypeVM();
+            zombieTypeVM.ZombieType = _baseDonnees.ZombieTypes.Find(id);
+            return View(zombieTypeVM);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(ZombieTypeVM zombieTypeVM)
+        {
+            if (ModelState.IsValid)
+            {
+                // Ajouter à la BD
+                _baseDonnees.ZombieTypes.Update(zombieTypeVM.ZombieType);
+                _baseDonnees.SaveChanges();
+                TempData["Success"] = $"{zombieTypeVM.ZombieType.TypeName} has been modified";
+                return this.RedirectToAction("Index");
+            }
+
+            return this.View(zombieTypeVM);
+        }
+
+        public IActionResult Delete(int id)
+        {
+            ZombieTypeVM zombieTypeVM = new ZombieTypeVM();
+            zombieTypeVM.ZombieType = _baseDonnees.ZombieTypes.Find(id);
+            return View(zombieTypeVM);
+        }
+
+        [HttpPost]
+        public IActionResult DeletePost(int id)
+        {
+            ZombieType? zombieType = _baseDonnees.ZombieTypes.Find(id);
+            if (zombieType == null)
+            {
+                return NotFound();
+            }
+
+            _baseDonnees.ZombieTypes.Remove(zombieType);
+            _baseDonnees.SaveChanges();
+            TempData["Success"] = $"Zombie {zombieType.TypeName} terminated";
+            return RedirectToAction("Index");
+        }
     }
 }
